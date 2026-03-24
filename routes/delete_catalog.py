@@ -6,8 +6,12 @@ from bson import ObjectId
 from bson.errors import InvalidId
 
 router = APIRouter()
+
+
 @router.delete("/catalog/delete/{id}")
 def delete_catalog(id: str, user=Depends(admin_only)):
+
+
     try:
         catalog_id = ObjectId(id)
     except InvalidId:
@@ -18,7 +22,10 @@ def delete_catalog(id: str, user=Depends(admin_only)):
     if not catalog:
         return failed("Catalog not found", 404)
 
-    if catalog["status"] not in ["DRAFT", "PENDING-APPROVAL", "REJECTED"]:
+    if catalog.get("deleted_flag", False):
+        return failed("Catalog already deleted", 400)
+
+    if catalog.get("status") not in ["DRAFT", "PENDING-APPROVAL", "REJECTED"]:
         return failed("Catalog cannot be deleted", 400)
 
     catalog_collection.update_one(
