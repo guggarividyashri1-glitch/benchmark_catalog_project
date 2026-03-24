@@ -148,7 +148,7 @@ class Catalog(BaseModel):
     @field_validator("visibility")
     def validate_visibility(cls, v):
 
-        if v not in ["Public", "Private"]:
-            raise ValueError("visibility must be Public or Private")
+        if v not in ["public", "private"]:
+            raise ValueError("visibility must be public or private")
 
         return v

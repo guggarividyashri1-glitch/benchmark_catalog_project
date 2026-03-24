@@ -6,8 +6,6 @@ SECRET = "benchmark_secret"
 ALGORITHM = "HS256"
 
 security = HTTPBearer()
-
-
 def create_token(role: str):
 
     payload = {"role": role}
