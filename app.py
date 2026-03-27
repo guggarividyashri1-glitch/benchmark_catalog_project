@@ -8,7 +8,13 @@ from routes import (
     update_catalog,
     get_catalog,
     delete_catalog,
-    update_status
+    update_status,
+    benchmark_execute,
+    get_benchmark,
+    update_benchmark,
+    delete_benchmark,
+    system_metrics,
+    get_system_metrics
 )
 
 from utils.auth import create_token
@@ -96,6 +102,11 @@ app.include_router(update_catalog.router)
 app.include_router(get_catalog.router)
 app.include_router(update_status.router)
 app.include_router(delete_catalog.router)
-
+app.include_router(benchmark_execute.router)
+app.include_router(get_benchmark.router)
+app.include_router(update_benchmark.router) 
+app.include_router(delete_benchmark.router) 
+app.include_router(system_metrics.router)  
+app.include_router(get_system_metrics.router)    
 
 

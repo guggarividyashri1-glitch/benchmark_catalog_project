@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from pymongo.errors import ServerSelectionTimeoutError
 import os
 from dotenv import load_dotenv
 
@@ -10,9 +11,22 @@ COLLECTION_NAME = os.getenv("COLLECTION", "benchmark_catalog")
 
 try:
     client = MongoClient(MONGO_URL)
+
+    # Force actual connection check
+    client.admin.command("ping")
+
     db = client[DB_NAME]
+
     catalog_collection = db[COLLECTION_NAME]
-    print(f"Connected to MongoDB: {MONGO_URL}, DB: {DB_NAME}, Collection: {COLLECTION_NAME}")
+    benchmark_execution_collection = db["benchmark_execution"]
+    workflow_runs_collection = db["workflow_runs"]
+    workflow_catalog_collection = db["workflow_catalog"]
+    system_metrics_collection = db["system_metrics"]
+
+    print(f"MongoDB connected successfully: {MONGO_URL}, DB: {DB_NAME}")
+
+except ServerSelectionTimeoutError:
+    raise Exception("MongoDB not reachable. Check if MongoDB is running or URL is incorrect.")
+
 except Exception as e:
-    print(f"Error connecting to MongoDB: {e}")
-    raise e
+    raise Exception(f"MongoDB connection failed: {str(e)}")
