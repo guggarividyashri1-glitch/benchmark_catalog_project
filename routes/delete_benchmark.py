@@ -11,6 +11,7 @@ from config.database import (
 from utils.response import success, failed
 
 router = APIRouter(tags=["Benchmark Execution"])
+
 @router.delete("/benchmark/delete/{id}")
 def delete_benchmark(id: str):
 
@@ -24,6 +25,11 @@ def delete_benchmark(id: str):
         wr_doc = None
         wc_doc = None
 
+        # 🔹 Check existing (including deleted)
+        be_exists = benchmark_execution_collection.find_one({"_id": obj_id})
+        wr_exists = workflow_runs_collection.find_one({"_id": obj_id})
+        wc_exists = workflow_catalog_collection.find_one({"_id": obj_id})
+
         be_doc = benchmark_execution_collection.find_one(
             {"_id": obj_id, "deleted": {"$ne": True}}
         )
@@ -36,6 +42,7 @@ def delete_benchmark(id: str):
                         "deleted": {"$ne": True}
                     }
                 )
+
         if not be_doc:
             wr_doc = workflow_runs_collection.find_one(
                 {"_id": obj_id, "deleted": {"$ne": True}}
@@ -82,8 +89,12 @@ def delete_benchmark(id: str):
                     }
                 )
 
+        # 🔹 FINAL CHECK (UPDATED LOGIC)
         if not be_doc and not wr_doc and not wc_doc:
-            return failed("Already deleted", 404)
+            if be_exists or wr_exists or wc_exists:
+                return failed("Already deleted", 404)
+            else:
+                return failed("Data not found", 404)
 
         current_time = datetime.utcnow()
 
@@ -98,6 +109,7 @@ def delete_benchmark(id: str):
                 {"_id": wr_doc["_id"]},
                 {"$set": {"deleted": True, "deleted_on": current_time}}
             )
+
         if wc_doc:
             workflow_catalog_collection.update_one(
                 {"_id": wc_doc["_id"]},
