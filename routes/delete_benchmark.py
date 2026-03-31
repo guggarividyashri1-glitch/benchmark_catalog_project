@@ -83,7 +83,7 @@ def delete_benchmark(id: str):
                 )
 
         if not be_doc and not wr_doc and not wc_doc:
-            return failed("Already deleted ", 404)
+            return failed("Already deleted", 404)
 
         current_time = datetime.utcnow()
 

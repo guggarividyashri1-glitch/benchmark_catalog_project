@@ -6,8 +6,6 @@ from config.database import system_metrics_collection
 from utils.response import success, failed
 
 router = APIRouter(tags=["Platform Pool"])
-
-
 @router.post("/metrics/insert")
 def insert_metrics(payload: SystemMetrics):
 

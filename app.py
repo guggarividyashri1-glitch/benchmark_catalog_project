@@ -5,16 +5,16 @@ from fastapi.exceptions import HTTPException
 
 from routes import (
     create_catalog,
+    get_system_metrics,
+    system_metrics,
+    update_benchmark,
     update_catalog,
     get_catalog,
     delete_catalog,
     update_status,
     benchmark_execute,
     get_benchmark,
-    update_benchmark,
-    delete_benchmark,
-    system_metrics,
-    get_system_metrics
+    delete_benchmark
 )
 
 from utils.auth import create_token

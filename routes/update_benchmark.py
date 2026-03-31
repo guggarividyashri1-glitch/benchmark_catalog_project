@@ -2,7 +2,6 @@ from fastapi import APIRouter
 from bson import ObjectId
 from bson.errors import InvalidId
 from datetime import datetime
-
 from config.database import (
     benchmark_execution_collection,
     workflow_runs_collection,
@@ -11,7 +10,6 @@ from config.database import (
 from utils.response import success, failed
 
 router = APIRouter(tags=["Benchmark Execution"])
-
 @router.patch("/benchmark/update/{id}")
 def update_benchmark(id: str, payload: dict):
 
@@ -24,13 +22,13 @@ def update_benchmark(id: str, payload: dict):
         be_doc = None
         wr_doc = None
         wc_doc = None
+
         be_doc = benchmark_execution_collection.find_one({"_id": obj_id})
 
-        if be_doc:
-            if "workflow_runs_id" in be_doc:
-                wr_doc = workflow_runs_collection.find_one(
-                    {"_id": ObjectId(be_doc["workflow_runs_id"])}
-                )
+        if be_doc and "workflow_runs_id" in be_doc:
+            wr_doc = workflow_runs_collection.find_one(
+                {"_id": ObjectId(be_doc["workflow_runs_id"])}
+            )
 
         if not be_doc:
             wr_doc = workflow_runs_collection.find_one({"_id": obj_id})
@@ -44,7 +42,7 @@ def update_benchmark(id: str, payload: dict):
             wc_doc = workflow_catalog_collection.find_one({"_id": obj_id})
 
             if wc_doc:
-                workflow_name = wc_doc["workflow_data"].get("workflow_name")
+                workflow_name = wc_doc.get("workflow_data", {}).get("workflow_name")
 
                 wr_doc = workflow_runs_collection.find_one(
                     {"workflow.workflow_name": workflow_name}
@@ -57,6 +55,7 @@ def update_benchmark(id: str, payload: dict):
 
         if not be_doc:
             return failed("No matching data found for given id", 404)
+
         if wr_doc and not wc_doc:
             workflow_name = wr_doc.get("workflow", {}).get("workflow_name")
             if workflow_name:
@@ -78,44 +77,61 @@ def update_benchmark(id: str, payload: dict):
             if key in be_doc and be_doc.get(key) != value:
                 be_update[key] = value
 
-            if wr_doc and key in wr_doc and wr_doc.get(key) != value:
-                wr_update[key] = value
+            if wr_doc:
+                if key.startswith("workflow."):
+                    wr_update[key] = value
+                elif key in wr_doc and wr_doc.get(key) != value:
+                    wr_update[key] = value
 
-            if key == "workflow":
-                if wr_doc:
-                    wr_update["workflow"] = value
-                if wc_doc:
-                    wc_update["workflow_data"] = value
+            if wc_doc:
+                if key.startswith("workflow."):
+                    new_key = key.replace("workflow.", "workflow_data.")
+                    wc_update[new_key] = value
+                elif key in wc_doc and wc_doc.get(key) != value:
+                    wc_update[key] = value
 
         if not be_update and not wr_update and not wc_update:
-            return failed("Data has not changed", 400)    
+            return failed("Data has not changed", 400)
+
+        now = datetime.utcnow()
 
         if be_update:
-            be_update["updated_on"] = datetime.utcnow()
+            be_update["updated_on"] = now
 
         if wr_update:
-            wr_update["updated_on"] = datetime.utcnow()
+            wr_update["updated_on"] = now
 
         if wc_update:
-            wc_update["updated_on"] = datetime.utcnow()
+            wc_update["updated_on"] = now
+
+        modified = False
 
         if be_update:
-            benchmark_execution_collection.update_one(
+            result = benchmark_execution_collection.update_one(
                 {"_id": be_doc["_id"]},
                 {"$set": be_update}
             )
+            if result.modified_count > 0:
+                modified = True
 
         if wr_doc and wr_update:
-            workflow_runs_collection.update_one(
+            result = workflow_runs_collection.update_one(
                 {"_id": wr_doc["_id"]},
                 {"$set": wr_update}
             )
+            if result.modified_count > 0:
+                modified = True
 
         if wc_doc and wc_update:
-            workflow_catalog_collection.update_one(
+            result = workflow_catalog_collection.update_one(
                 {"_id": wc_doc["_id"]},
                 {"$set": wc_update}
             )
+            if result.modified_count > 0:
+                modified = True
+
+        if not modified:
+            return failed("Data has not changed", 400)
 
         return success("Data updated successfully across all collections")
 

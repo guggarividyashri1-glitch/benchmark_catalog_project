@@ -7,16 +7,12 @@ from utils.response import success, failed
 
 router = APIRouter(tags=["Platform Pool"])
 
-
-# Convert ObjectId to string
 def convert_objectid(data):
     if isinstance(data, dict):
         return {k: str(v) if isinstance(v, ObjectId) else convert_objectid(v) for k, v in data.items()}
     if isinstance(data, list):
         return [convert_objectid(i) for i in data]
     return data
-
-
 @router.get("/metrics/get")
 def get_metrics(
     id: str = Query(default=None),
@@ -26,15 +22,12 @@ def get_metrics(
 ):
     try:
         query = {}
-
-        # Search by ID
         if id:
             try:
                 query["_id"] = ObjectId(id)
             except InvalidId:
                 return failed("Invalid id provided", 400)
 
-        # Search by other fields
         if ip_address:
             query["ip_address"] = ip_address
 
@@ -44,7 +37,6 @@ def get_metrics(
         if server_name:
             query["server_name"] = server_name
 
-        # If any filter is applied
         if query:
             data = list(system_metrics_collection.find(query))
 
@@ -56,7 +48,6 @@ def get_metrics(
                 convert_objectid(data)
             )
 
-        # If no filters → return all data
         all_data = list(system_metrics_collection.find())
 
         if not all_data:
