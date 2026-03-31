@@ -25,7 +25,6 @@ def delete_benchmark(id: str):
         wr_doc = None
         wc_doc = None
 
-        # 🔹 Check existing (including deleted)
         be_exists = benchmark_execution_collection.find_one({"_id": obj_id})
         wr_exists = workflow_runs_collection.find_one({"_id": obj_id})
         wc_exists = workflow_catalog_collection.find_one({"_id": obj_id})
@@ -89,7 +88,6 @@ def delete_benchmark(id: str):
                     }
                 )
 
-        # 🔹 FINAL CHECK (UPDATED LOGIC)
         if not be_doc and not wr_doc and not wc_doc:
             if be_exists or wr_exists or wc_exists:
                 return failed("Already deleted", 404)
