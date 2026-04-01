@@ -1,19 +1,19 @@
 from fastapi import APIRouter
 from datetime import datetime
 
-from models.system_metrics_model import SystemMetrics
-from config.database import system_metrics_collection
+from models.system_metrics_model import PlatformPool
+from config.database import platform_pool_collection
 from utils.response import success, failed
 
 router = APIRouter(tags=["Platform Pool"])
 @router.post("/metrics/insert")
-def insert_metrics(payload: SystemMetrics):
+def insert_metrics(payload: PlatformPool):
 
     try:
         data = payload.model_dump()
         data["ip_address"] = str(data["ip_address"])
 
-        existing = system_metrics_collection.find_one({
+        existing = platform_pool_collection.find_one({
             "ip_address": data["ip_address"]
         })
 
@@ -22,9 +22,9 @@ def insert_metrics(payload: SystemMetrics):
 
         data["status"] = "active"
         data["created_on"] = datetime.utcnow()
-        result = system_metrics_collection.insert_one(data)
+        result = platform_pool_collection.insert_one(data)
 
-        inserted_data = system_metrics_collection.find_one({
+        inserted_data = platform_pool_collection.find_one({
             "_id": result.inserted_id
         })
 

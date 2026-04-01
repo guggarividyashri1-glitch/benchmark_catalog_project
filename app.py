@@ -5,8 +5,8 @@ from fastapi.exceptions import HTTPException
 
 from routes import (
     create_catalog,
-    get_system_metrics,
-    system_metrics,
+    get_platform_pool,
+    platform_pool,
     update_benchmark,
     update_catalog,
     get_catalog,
@@ -106,7 +106,7 @@ app.include_router(benchmark_execute.router)
 app.include_router(get_benchmark.router)
 app.include_router(update_benchmark.router) 
 app.include_router(delete_benchmark.router) 
-app.include_router(system_metrics.router)  
-app.include_router(get_system_metrics.router)    
+app.include_router(platform_pool.router)  
+app.include_router(get_platform_pool.router)    
 
 

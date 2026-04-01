@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, IPvAnyAddress
 
-class SystemMetrics(BaseModel):
+class PlatformPool(BaseModel):
     cpu_usage: float = Field(..., gt=1, description="CPU usage must be greater than 1")
     memory_usage: float = Field(..., gt=1, description="Memory usage must be greater than 1")
     bytes_sent: int = Field(..., gt=1, description="Bytes sent must be greater than 1")

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query
 from bson import ObjectId
 from bson.errors import InvalidId
 
-from config.database import system_metrics_collection
+from config.database import platform_pool_collection
 from utils.response import success, failed
 
 router = APIRouter(tags=["Platform Pool"])
@@ -38,7 +38,7 @@ def get_metrics(
             query["server_name"] = server_name
 
         if query:
-            data = list(system_metrics_collection.find(query))
+            data = list(platform_pool_collection.find(query))
 
             if not data:
                 return failed("No matching data found", 404)
@@ -48,7 +48,7 @@ def get_metrics(
                 convert_objectid(data)
             )
 
-        all_data = list(system_metrics_collection.find())
+        all_data = list(platform_pool_collection.find())
 
         if not all_data:
             return success("No data available", [])

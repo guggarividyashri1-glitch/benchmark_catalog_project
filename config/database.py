@@ -21,7 +21,7 @@ try:
     benchmark_execution_collection = db["benchmark_execution"]
     workflow_runs_collection = db["workflow_runs"]
     workflow_catalog_collection = db["workflow_catalog"]
-    system_metrics_collection = db["system_metrics"]
+    platform_pool_collection = db["platform_pool"]
 
     print(f"MongoDB connected successfully: {MONGO_URL}, DB: {DB_NAME}")
 
