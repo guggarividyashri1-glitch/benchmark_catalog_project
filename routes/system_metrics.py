@@ -31,7 +31,7 @@ def insert_metrics(payload: SystemMetrics):
         inserted_data["_id"] = str(inserted_data["_id"])
 
         return success(
-            "System metrics inserted successfully",
+            "Platform pool inserted successfully",
             inserted_data
         )
 
