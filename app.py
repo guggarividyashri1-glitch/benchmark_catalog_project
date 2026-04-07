@@ -3,18 +3,25 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import HTTPException
 
-from routes import (
+from routes.benchmark import (
     create_catalog,
-    get_platform_pool,
-    platform_pool,
-    update_benchmark,
     update_catalog,
     get_catalog,
     delete_catalog,
     update_status,
+)
+from routes.benchmark_execution import (
     benchmark_execute,
     get_benchmark,
-    delete_benchmark
+    delete_benchmark,
+    update_benchmark
+)
+from routes.platform_pool import(
+    get_platform_pool,
+    platform_pool
+)
+from routes.jobs import(
+    jobs
 )
 
 from utils.auth import create_token
@@ -107,6 +114,7 @@ app.include_router(get_benchmark.router)
 app.include_router(update_benchmark.router) 
 app.include_router(delete_benchmark.router) 
 app.include_router(platform_pool.router)  
-app.include_router(get_platform_pool.router)    
+app.include_router(get_platform_pool.router)  
+app.include_router(jobs.router)  
 
 
