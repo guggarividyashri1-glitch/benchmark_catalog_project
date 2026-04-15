@@ -18,8 +18,10 @@ def execute_benchmark(payload: BenchmarkExecute):
     try:
         data = payload.model_dump()
         user_email = "system"
+
         updated_workflow = dict(data["workflow"])
         updated_stages = []
+        flattened_data = []   
 
         for stage in updated_workflow["stages"]:
             updated_tasks = []
@@ -44,12 +46,20 @@ def execute_benchmark(payload: BenchmarkExecute):
 
                 updated_task = dict(task)
                 updated_task["job_id"] = job_id
-
                 updated_tasks.append(updated_task)
+
+                flattened_data.append({
+                    "stage_name": stage["stage_name"],
+                    "stage_type": stage["stage_type"],
+                    "stage_order": stage["stage_order"],
+                    "task_name": task["task_name"],
+                    "task_type": task["task_type"],
+                    "task_order": task["task_order"],
+                    "job_id": job_id
+                })
 
             updated_stage = dict(stage)
             updated_stage["tasks"] = updated_tasks
-
             updated_stages.append(updated_stage)
 
         updated_workflow["stages"] = updated_stages
@@ -60,7 +70,7 @@ def execute_benchmark(payload: BenchmarkExecute):
         be_id = benchmark_execution_collection.insert_one(be_data).inserted_id
 
         wr_data = {k: v for k, v in data.items() if k != "save_to_workflow_catalog"}
-        wr_data["workflow"] = updated_workflow
+        wr_data["workflow"] = flattened_data  
         wr_data["created_on"] = datetime.utcnow()
         wr_data["created_by"] = user_email
 
@@ -84,14 +94,13 @@ def execute_benchmark(payload: BenchmarkExecute):
                 }
             }
         )
-
         if data.get("save_to_workflow_catalog"):
             workflow_catalog_collection.insert_one({
                 "catalog_name": updated_workflow["workflow_name"],
                 "benchmark_name": data.get("benchmark_name"),
                 "workflow_name": updated_workflow["workflow_name"],
                 "visibility": updated_workflow["visibility"],
-                "workflow_data": updated_workflow,  
+                "workflow_data": flattened_data,   
                 "created_on": datetime.utcnow(),
                 "created_by": user_email
             })

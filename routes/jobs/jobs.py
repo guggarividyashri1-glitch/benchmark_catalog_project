@@ -3,9 +3,9 @@ from datetime import datetime
 from bson import ObjectId
 from config.database import job_collection
 
-router = APIRouter(tags=["Job Status"])
+router = APIRouter(tags=["Jobs"])
 
-@router.put("/job/status")
+@router.put("/jobs/status")
 def update_job_status(job_id: str, status: str):
     try:
         valid_status = ["queued", "running", "completed"]

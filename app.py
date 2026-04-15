@@ -21,7 +21,8 @@ from routes.platform_pool import(
     platform_pool
 )
 from routes.jobs import(
-    jobs
+    jobs,
+    get_jobs
 )
 
 from utils.auth import create_token
@@ -116,5 +117,6 @@ app.include_router(delete_benchmark.router)
 app.include_router(platform_pool.router)  
 app.include_router(get_platform_pool.router)  
 app.include_router(jobs.router)  
+app.include_router(get_jobs.router)
 
 
