@@ -21,7 +21,7 @@ def update_job_status(job_id: str, status: str):
         if not job:
             raise HTTPException(status_code=404, detail="Job not found")
 
-        current_status = job.get("job_status", "").lower()
+        current_status = job.get("job_status", "")
 
         if current_status == status:
             return {
@@ -46,7 +46,7 @@ def update_job_status(job_id: str, status: str):
 
         if status == "running" and not job.get("started_at"):
             update_data["started_at"] = datetime.utcnow()
-            
+
         if status == "completed" and not job.get("finished_at"):
             update_data["finished_at"] = datetime.utcnow()
 

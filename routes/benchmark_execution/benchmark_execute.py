@@ -18,22 +18,18 @@ def execute_benchmark(payload: BenchmarkExecute):
     try:
         data = payload.model_dump()
         user_email = "system"
-
         updated_workflow = dict(data["workflow"])
-        updated_stages = []
-        flattened_data = []   
 
-        for stage in updated_workflow["stages"]:
-            updated_tasks = []
+        for stage in updated_workflow.get("stages", []):
+            for task in stage.get("tasks", []):
 
-            for task in stage["tasks"]:
                 job_doc = {
-                    "stage_type": stage["stage_type"],
-                    "stage_name": stage["stage_name"],
-                    "stage_order": stage["stage_order"],
-                    "task_type": task["task_type"],
-                    "task_name": task["task_name"],
-                    "task_order": task["task_order"],
+                    "stage_type": stage.get("stage_type"),
+                    "stage_name": stage.get("stage_name"),
+                    "stage_order": stage.get("stage_order"),
+                    "task_type": task.get("task_type"),
+                    "task_name": task.get("task_name"),
+                    "task_order": task.get("task_order"),
 
                     "job_status": "queued",
                     "started_at": None,
@@ -44,35 +40,18 @@ def execute_benchmark(payload: BenchmarkExecute):
                 job_result = job_collection.insert_one(job_doc)
                 job_id = str(job_result.inserted_id)
 
-                updated_task = dict(task)
-                updated_task["job_id"] = job_id
-                updated_tasks.append(updated_task)
-
-                flattened_data.append({
-                    "stage_name": stage["stage_name"],
-                    "stage_type": stage["stage_type"],
-                    "stage_order": stage["stage_order"],
-                    "task_name": task["task_name"],
-                    "task_type": task["task_type"],
-                    "task_order": task["task_order"],
-                    "job_id": job_id
-                })
-
-            updated_stage = dict(stage)
-            updated_stage["tasks"] = updated_tasks
-            updated_stages.append(updated_stage)
-
-        updated_workflow["stages"] = updated_stages
-
+                task["job_id"] = job_id
         be_data = {k: v for k, v in data.items() if k != "workflow"}
-        be_data["workflow"] = updated_workflow
+        be_data["created_on"] = datetime.utcnow()
 
         be_id = benchmark_execution_collection.insert_one(be_data).inserted_id
 
-        wr_data = {k: v for k, v in data.items() if k != "save_to_workflow_catalog"}
-        wr_data["workflow"] = flattened_data  
-        wr_data["created_on"] = datetime.utcnow()
-        wr_data["created_by"] = user_email
+        wr_data = {
+            "benchmark_name": data.get("benchmark_name"),
+            "workflow": updated_workflow,   
+            "created_on": datetime.utcnow(),
+            "created_by": user_email
+        }
 
         wr_id = workflow_runs_collection.insert_one(wr_data).inserted_id
 
@@ -85,6 +64,7 @@ def execute_benchmark(payload: BenchmarkExecute):
             {"_id": wr_id},
             {"$set": {"benchmark_execution_id": str(be_id)}}
         )
+
         job_collection.update_many(
             {"workflow_run_id": {"$exists": False}},
             {
@@ -94,13 +74,14 @@ def execute_benchmark(payload: BenchmarkExecute):
                 }
             }
         )
+
         if data.get("save_to_workflow_catalog"):
             workflow_catalog_collection.insert_one({
-                "catalog_name": updated_workflow["workflow_name"],
+                "catalog_name": updated_workflow.get("workflow_name"),
                 "benchmark_name": data.get("benchmark_name"),
-                "workflow_name": updated_workflow["workflow_name"],
-                "visibility": updated_workflow["visibility"],
-                "workflow_data": flattened_data,   
+                "workflow_name": updated_workflow.get("workflow_name"),
+                "visibility": updated_workflow.get("visibility"),
+                "workflow_data": updated_workflow,  
                 "created_on": datetime.utcnow(),
                 "created_by": user_email
             })
