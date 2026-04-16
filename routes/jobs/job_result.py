@@ -37,9 +37,6 @@ def update_job_result(payload: JobResultModel, job_id: str = Header(...)):
                 if not sut_id or not str(sut_id).strip():
                     return failed("sut_id is compulsory", 400)
 
-                if details.success is None:
-                    return failed("success is compulsory", 400)
-
                 success_values.append(details.success)
 
                 temp[sut_id] = details.dict()
