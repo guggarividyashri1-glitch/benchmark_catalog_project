@@ -21,6 +21,7 @@ from routes.platform_pool import(
     platform_pool
 )
 from routes.jobs import(
+    job_result,
     jobs,
     get_jobs
 )
@@ -118,5 +119,6 @@ app.include_router(platform_pool.router)
 app.include_router(get_platform_pool.router)  
 app.include_router(jobs.router)  
 app.include_router(get_jobs.router)
+app.include_router(job_result.router)   
 
 

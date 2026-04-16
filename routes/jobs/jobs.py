@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from datetime import datetime
 from bson import ObjectId
-from bson.errors import InvalidId
+from bson.errors import InvalidId   
 from config.database import job_collection
 
 router = APIRouter(tags=["Jobs"])
@@ -10,15 +10,15 @@ def update_job_status(job_id: str, status: str):
     try:
         status = status.lower()
 
-        valid_status = ["queued", "running", "completed", "failed"]
+        valid_status = ["queued", "running", "completed"]
+
         if status not in valid_status:
             raise HTTPException(status_code=400, detail="Invalid status")
-
         try:
             obj_id = ObjectId(job_id)
-        except:
-            raise HTTPException(status_code=400, detail="Invalid job id")
-
+        except InvalidId:
+            raise HTTPException(status_code=400, detail="Invalid id provided")
+        
         job = job_collection.find_one({"_id": obj_id})
         if not job:
             raise HTTPException(status_code=404, detail="Job not found")
@@ -33,9 +33,8 @@ def update_job_status(job_id: str, status: str):
 
         valid_transitions = {
             "queued": ["running"],
-            "running": ["completed", "failed"],
-            "completed": [],
-            "failed": []
+            "running": ["completed"],
+            "completed": []
         }
 
         if status not in valid_transitions.get(current_status, []):
@@ -44,49 +43,21 @@ def update_job_status(job_id: str, status: str):
                 detail=f"Invalid status transition from '{current_status}' to '{status}'"
             )
 
-        success_flag = True if status == "completed" else False
-        result_data = [
-            {
-                "0.0.0.0": {
-                    "success": success_flag,
-                    "message": "string",
-                    "error": ""
-                }
-            },
-            {
-                "1.1.1.1": {
-                    "success": success_flag,
-                    "message": "",
-                    "error": ""
-                }
-            }
-        ]
-        for item in result_data:
-            for ip, val in item.items():
-                if status in ["running", "failed"]:
-                    val["success"] = True if ip == "0.0.0.0" else False
-                elif status == "completed":
-                    val["success"] = True
-
-        update_fields = {
+        update_data = {
             "job_status": status,
-            "updated_at": datetime.utcnow(),
-            "result": result_data
+            "updated_at": datetime.utcnow()
         }
 
         if status == "running" and not job.get("started_at"):
-            update_fields["started_at"] = datetime.utcnow()
+            update_data["started_at"] = datetime.utcnow()
 
-        if status in ["completed", "failed"] and not job.get("finished_at"):
-            update_fields["finished_at"] = datetime.utcnow()
+        if status == "completed" and not job.get("finished_at"):
+            update_data["finished_at"] = datetime.utcnow()
 
-        res = job_collection.update_one(
+        job_collection.update_one(
             {"_id": obj_id},
-            {"$set": update_fields}
+            {"$set": update_data}
         )
-
-        if res.matched_count == 0:
-            raise HTTPException(status_code=500, detail="Update failed")
 
         return {
             "message": "Job status updated successfully",
@@ -95,8 +66,8 @@ def update_job_status(job_id: str, status: str):
             "new_status": status
         }
 
-    except InvalidId:
-        raise HTTPException(status_code=400, detail="Invalid job id")
+    except HTTPException as e:
+        raise e
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
