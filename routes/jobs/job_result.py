@@ -2,7 +2,6 @@ from fastapi import APIRouter, Header
 from datetime import datetime
 from bson import ObjectId
 from bson.errors import InvalidId
-
 from config.database import job_collection
 from models.job_result_model import JobResultModel
 from utils.response import success, failed  
