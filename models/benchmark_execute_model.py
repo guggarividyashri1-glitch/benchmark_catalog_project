@@ -1,8 +1,6 @@
 from pydantic import BaseModel, field_validator, model_validator
 from typing import List, Dict, Any
 
-
-# ------------------ COMMON VALIDATORS ------------------
 def not_empty_string(value: str, field_name: str):
     if not value or value.strip() == "":
         raise ValueError(f"{field_name} should not be empty")
@@ -31,8 +29,6 @@ def validate_string_list(value: List, field_name: str):
 
     return value
 
-
-# ------------------ TASK ------------------
 class Task(BaseModel):
     task_type: str
     task_name: str
@@ -44,15 +40,13 @@ class Task(BaseModel):
         not_empty_string(self.task_name, "task_name")
         validate_number(self.task_order, "task_order")
         return self
-
-
-# ------------------ STAGE ------------------
+    
 class Stage(BaseModel):
     stage_type: str
     stage_name: str
     stage_order: int
 
-    tasks: List[Task]   # ✅ FIXED
+    tasks: List[Task]   
 
     executor: Dict[str, Any]
     parameters: Dict[str, Any]
@@ -79,8 +73,6 @@ class Stage(BaseModel):
 
         return self
 
-
-# ------------------ WORKFLOW ------------------
 class Workflow(BaseModel):
     stages: List[Stage]
     workflow_name: str
@@ -96,8 +88,6 @@ class Workflow(BaseModel):
 
         return self
 
-
-# ------------------ SCHEDULE ------------------
 class ScheduleTest(BaseModel):
     test_name: str
 
@@ -124,8 +114,6 @@ class ScheduleDetails(BaseModel):
 
         return self
 
-
-# ------------------ MAIN ------------------
 class BenchmarkExecute(BaseModel):
     benchmark_name: str
     benchmark_category: str
