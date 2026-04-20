@@ -10,7 +10,7 @@ def update_job_status(job_id: str, status: str):
     try:
         status = status.lower()
 
-        valid_status = ["queued", "running", "completed"]
+        valid_status = ["queued", "running", "completed","failed"]
 
         if status not in valid_status:
             raise HTTPException(status_code=400, detail="Invalid status")
@@ -33,8 +33,9 @@ def update_job_status(job_id: str, status: str):
 
         valid_transitions = {
             "queued": ["running"],
-            "running": ["completed"],
-            "completed": []
+            "running": ["completed","failed"],
+            "completed": [],
+            "failed":[]
         }
 
         if status not in valid_transitions.get(current_status, []):

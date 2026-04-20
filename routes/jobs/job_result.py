@@ -50,6 +50,9 @@ def update_job_result(payload: JobResultModel, job_id: str = Header(...)):
         elif current_status == "running":
             valid = (any(success_values) and not all(success_values))
 
+        elif current_status == "failed":
+            valid = (any(success_values) and not all(success_values))
+
         else:
             valid = False
 

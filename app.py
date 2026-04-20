@@ -119,6 +119,7 @@ app.include_router(platform_pool.router)
 app.include_router(get_platform_pool.router)  
 app.include_router(jobs.router)  
 app.include_router(get_jobs.router)
-app.include_router(job_result.router)   
+app.include_router(job_result.router)  
+
 
 
