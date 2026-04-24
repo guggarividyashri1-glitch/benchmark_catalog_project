@@ -23,6 +23,7 @@ try:
     workflow_catalog_collection = db["workflow_catalog"]
     platform_pool_collection = db["platform_pool"]
     job_collection=db["jobs"]
+    benchmark_collection = db["benchmark_results"]
 
     print(f"MongoDB connected successfully: {MONGO_URL}, DB: {DB_NAME}")
 

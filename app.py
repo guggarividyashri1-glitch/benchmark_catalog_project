@@ -26,6 +26,8 @@ from routes.jobs import(
     get_jobs
 )
 
+from routes import platform_profiler
+
 from utils.auth import create_token
 
 app = FastAPI(
@@ -120,6 +122,7 @@ app.include_router(get_platform_pool.router)
 app.include_router(jobs.router)  
 app.include_router(get_jobs.router)
 app.include_router(job_result.router)  
+app.include_router(platform_profiler.router)
 
 
 

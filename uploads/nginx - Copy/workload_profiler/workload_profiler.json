@@ -1,0 +1,4 @@
+{
+  "workload": "test_load",
+  "requests": 1000
+}

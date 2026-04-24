@@ -1,0 +1,10 @@
+{
+  "workload_name": "sample_test",
+  "total_requests": 1000,
+  "concurrent_users": 50,
+  "duration_sec": 120,
+  "request_type": "GET",
+  "target_url": "http://localhost:8080",
+  "throughput_rps": 8.3,
+  "status": "completed"
+}
