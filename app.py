@@ -25,7 +25,10 @@ from routes.jobs import(
     jobs,
     get_jobs
 )
-
+from routes.sme import(
+    sme,
+    sme_mapping
+)
 from routes import platform_profiler
 
 from utils.auth import create_token
@@ -123,6 +126,9 @@ app.include_router(jobs.router)
 app.include_router(get_jobs.router)
 app.include_router(job_result.router)  
 app.include_router(platform_profiler.router)
+app.include_router(sme.router)
+app.include_router(sme_mapping.router)
+
 
 
 
